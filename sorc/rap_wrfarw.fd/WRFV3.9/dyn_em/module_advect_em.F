@@ -383,13 +383,13 @@ SUBROUTINE advect_ph_implicit( ph, pho, tendency, phb,        &
        DO i = i_start, i_end
 
 ! We are choosing to do the vertical advection here the same as in RHS_PH,
-! e.g., 2nd order box averaging instead of the usual upwinding...
+! e.g., 2nd order upwinding...
 ! Divide my mu(i,j) to make sure the diagnonal term is ~O(1)
 
 ! Upwind
          wiC     = 0.5*wwI(i,k,j)*(rdzw(k-1)+rdzw(k)) * msfty(i,j) / mut(i,j) 
-         at(i,k) = - dt_rk*max(wiC,0.0)
-         ct(i,k) =   dt_rk*min(wiC,0.0)
+         at(i,k) = - max(dt_rk*wiC,0.0)
+         ct(i,k) =   min(dt_rk*wiC,0.0)
          btmp(i) = - at(i,k) - ct(i,k)
 
 ! 2nd order centered for both implicit piece of advection
@@ -542,9 +542,9 @@ SUBROUTINE advect_s_implicit( s, s_old, tendency,            &
          wiL   = rom(i,k,  j) * rdzw(k) / mut(i,j)
          wiR   = rom(i,k+1,j) * rdzw(k) / mut(i,j)
 
-         at(i,k) = - dt_rk*max(wiL,0.0)
-         ct(i,k) =   dt_rk*min(wiR,0.0)
-         btmp(i) =   dt_rk*(max(wiR,0.0) - min(wiL,0.0))
+         at(i,k) = - max(dt_rk*wiL,0.0)
+         ct(i,k) =   min(dt_rk*wiR,0.0)
+         btmp(i) =  (max(dt_rk*wiR,0.0) - min(dt_rk*wiL,0.0))
          bt(i,k) = 1.0 + btmp(i)
          rt(i,k) = dt_rk*tendency(i,k,j)            &
                  - mut(i,j)*(at(i,k)*s_old(i,km1,j) &
@@ -674,9 +674,9 @@ SUBROUTINE advect_u_implicit( u, u_old, tendency,            &
          wiL   = 0.5*(rom(i-1,k,  j)+rom(i,k,  j)) * rdzw(k) * msfuy(i,j) / muu(i,j)
          wiR   = 0.5*(rom(i-1,k+1,j)+rom(i,k+1,j)) * rdzw(k) * msfuy(i,j) / muu(i,j)
          
-         at(i,k) = - dt_rk*max(wiL,0.0)
-         ct(i,k) =   dt_rk*min(wiR,0.0) 
-         btmp(i) =   dt_rk*(max(wiR,0.0) - min(wiL,0.0)) 
+         at(i,k) = - max(dt_rk*wiL,0.0)
+         ct(i,k) =   min(dt_rk*wiR,0.0) 
+         btmp(i) =  (max(dt_rk*wiR,0.0) - min(dt_rk*wiL,0.0)) 
          bt(i,k) = 1.0 + btmp(i)
          rt(i,k) = dt_rk*tendency(i,k,j)*msfuy(i,j)      &
                  - muu(i,j) * (at(i,k)*u_old(i,km1,j)    &
@@ -807,9 +807,9 @@ SUBROUTINE advect_v_implicit( v, v_old, tendency,            &
          wiL   = 0.5*(rom(i,k,  j-1)+rom(i,k,  j)) * rdzw(k) * msfvy(i,j) / muv(i,j)
          wiR   = 0.5*(rom(i,k+1,j-1)+rom(i,k+1,j)) * rdzw(k) * msfvy(i,j) / muv(i,j)
          
-         at(i,k) = - dt_rk*max(wiL,0.0)
-         ct(i,k) =   dt_rk*min(wiR,0.0)
-         btmp(i) =   dt_rk*(max(wiR,0.0) - min(wiL,0.0))
+         at(i,k) = - max(dt_rk*wiL,0.0)
+         ct(i,k) =   min(dt_rk*wiR,0.0)
+         btmp(i) =  (max(dt_rk*wiR,0.0) - min(dt_rk*wiL,0.0))
          bt(i,k) = 1.0 + btmp(i)
          rt(i,k) = dt_rk*tendency(i,k,j) * msfvx(i,j)  &
                  - muv(i,j) * (at(i,k)*v_old(i,km1,j)  &
@@ -939,9 +939,9 @@ SUBROUTINE advect_w_implicit( w, w_old, tendency,            &
          wiL   = 0.5*(rom(i,k-1,j)+rom(i,k,j)) * rdzu(k) * msfty(i,j) / mut(i,j)
          wiR   = 0.5*(rom(i,k+1,j)+rom(i,k,j)) * rdzu(k) * msfty(i,j) / mut(i,j)
 
-         at(i,k) = - dt_rk*max(wiL,0.0)
-         ct(i,k) =   dt_rk*min(wiR,0.0) 
-         btmp(i) =   dt_rk*(max(wiR,0.0) - min(wiL,0.0)) 
+         at(i,k) = - max(dt_rk*wiL,0.0)
+         ct(i,k) =   min(dt_rk*wiR,0.0) 
+         btmp(i) =  (max(dt_rk*wiR,0.0) - min(dt_rk*wiL,0.0)) 
          bt(i,k) =   1.0 + btmp(i)
          rt(i,k) = dt_rk*tendency(i,k,j) * msfty(i,j)  &
                  - mut(i,j) * (at(i,k)*w_old(i,k-1,j)  &
